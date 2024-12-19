@@ -1,11 +1,15 @@
+"""
+Module untuk memproses citra dengan kontras rendah.
+Fitur: Histogram Equalization dan Penyesuaian Kontras.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import imageio.v2 as imageio
 
 # Membaca citra input dengan kontras rendah
-image_path = "Wack.jpg"  # Ganti dengan path ke citra Anda
-low_contrast_image = imageio.imread(image_path, mode="L")
-
+IMAGE_PATH = "Wack.jpg"  # Ganti dengan path ke citra Anda
+low_contrast_image = imageio.imread(IMAGE_PATH, mode="L")
 
 # Normalisasi ke rentang [0, 255] jika belum dalam rentang tersebut
 low_contrast_image = (low_contrast_image - low_contrast_image.min()) / (
@@ -14,9 +18,17 @@ low_contrast_image = (low_contrast_image - low_contrast_image.min()) / (
 low_contrast_image = (low_contrast_image * 255).astype(np.uint8)
 
 
-# Histogram Equalization
 def histogram_equalization(img):
-    histogram, bins = np.histogram(img.flatten(), 256, [0, 256])
+    """
+    Melakukan histogram equalization pada citra untuk meningkatkan kontras.
+
+    Parameters:
+        img (numpy.ndarray): Citra input dalam format array 2D.
+
+    Returns:
+        numpy.ndarray: Citra setelah histogram equalization.
+    """
+    histogram, _ = np.histogram(img.flatten(), 256, [0, 256])
     cdf = histogram.cumsum()  # Cumulative Distribution Function
     cdf_masked = np.ma.masked_equal(cdf, 0)  # Masking nilai nol
     cdf_masked = (
@@ -27,16 +39,23 @@ def histogram_equalization(img):
     return equalized_img
 
 
-equalized_image = histogram_equalization(low_contrast_image)
-
-
-# Kontras Penyesuaian Level
 def contrast_adjustment(img, level=1.2):
+    """
+    Menyesuaikan kontras citra berdasarkan level tertentu.
+
+    Parameters:
+        img (numpy.ndarray): Citra input dalam format array 2D.
+        level (float): Tingkat penyesuaian kontras. Default 1.2.
+
+    Returns:
+        numpy.ndarray: Citra setelah penyesuaian kontras.
+    """
     img_normalized = img / 255.0  # Normalisasi ke rentang [0, 1]
     adjusted_img = np.clip(128 + level * (img_normalized * 255 - 128), 0, 255)
     return adjusted_img.astype(np.uint8)
 
 
+equalized_image = histogram_equalization(low_contrast_image)
 contrast_adjusted_image = contrast_adjustment(low_contrast_image, level=1.5)
 
 # Koreksi inversi jika terjadi
